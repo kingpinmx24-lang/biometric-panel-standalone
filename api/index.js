@@ -9,7 +9,6 @@ const os = require('os');
 const { analyzeRidges } = require('../lib/ridge-analyzer');
 const { enhanceFingerprint, preserveAndEnhance, enhanceWithTexture, fillRidgesBlack, forensicEnhance, ultraProfessionalEnhance } = require('../lib/texture-enhancer');
 const { parsePromptForPoreIntensity } = require('../lib/pore-generator');
-const { authenticate, createSession, validateSession, closeSession } = require('../lib/auth');
 
 const app = express();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -24,58 +23,6 @@ if (!fs.existsSync(resultsDir)) {
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb' }));
-
-// Middleware de autenticación
-function requireAuth(req, res, next) {
-  const sessionId = req.cookies?.sessionId || req.headers?.authorization?.replace('Bearer ', '');
-  
-  if (!sessionId) {
-    return res.status(401).json({ error: 'No autorizado' });
-  }
-  
-  const validation = validateSession(sessionId);
-  if (!validation.valid) {
-    return res.status(401).json({ error: 'Sesión inválida' });
-  }
-  
-  req.sessionId = sessionId;
-  req.username = validation.session.username;
-  next();
-}
-
-/**
- * Endpoint: Login
- */
-app.post('/api/login', express.json(), (req, res) => {
-  const { username, password } = req.body;
-  
-  if (!username || !password) {
-    return res.status(400).json({ error: 'Usuario y contraseña requeridos' });
-  }
-  
-  const result = authenticate(username, password);
-  
-  if (!result.success) {
-    return res.status(401).json({ error: result.message });
-  }
-  
-  const sessionId = createSession(username);
-  
-  res.json({
-    success: true,
-    sessionId,
-    user: result.user,
-    message: 'Autenticación exitosa'
-  });
-});
-
-/**
- * Endpoint: Logout
- */
-app.post('/api/logout', requireAuth, (req, res) => {
-  closeSession(req.sessionId);
-  res.json({ success: true, message: 'Sesión cerrada' });
-});
 
 /**
  * Analizar características de huella dactilares (usando visión computacional avanzada)
@@ -138,7 +85,7 @@ async function enhanceFingerprintTexture(imageBuffer, mode = 'standard', customP
 /**
  * Endpoint: Analizar huella
  */
-app.post('/api/analyze', requireAuth, upload.single('fingerprint'), async (req, res) => {
+app.post('/api/analyze', upload.single('fingerprint'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -161,7 +108,7 @@ app.post('/api/analyze', requireAuth, upload.single('fingerprint'), async (req, 
 /**
  * Endpoint: Procesar huella (análisis + mejora)
  */
-app.post('/api/process', requireAuth, upload.single('fingerprint'), async (req, res) => {
+app.post('/api/process', upload.single('fingerprint'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -199,7 +146,7 @@ app.post('/api/process', requireAuth, upload.single('fingerprint'), async (req, 
 /**
  * Endpoint: Procesar con modo avanzado y prompt personalizado
  */
-app.post('/api/process-advanced', requireAuth, upload.single('fingerprint'), async (req, res) => {
+app.post('/api/process-advanced', upload.single('fingerprint'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
