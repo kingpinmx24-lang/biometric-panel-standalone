@@ -19,6 +19,90 @@
       min-height: 100vh;
     }
     
+    .login-container {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(10, 14, 39, 0.95);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .login-container.active {
+      display: flex;
+    }
+    
+    .login-box {
+      border: 2px solid #00ff00;
+      padding: 40px;
+      background: #0f1a3d;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+    }
+    
+    .login-box h1 {
+      margin-bottom: 30px;
+      font-size: 28px;
+    }
+    
+    .login-box input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      background: #0a0e27;
+      border: 1px solid #00ff00;
+      color: #00ff00;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .login-box button {
+      width: 100%;
+      padding: 12px;
+      background: #00ff00;
+      color: #0a0e27;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    
+    .login-box button:hover {
+      background: #00aa00;
+    }
+    
+    .login-error {
+      color: #ff0000;
+      margin-bottom: 15px;
+      font-size: 12px;
+    }
+    
+    .app-container {
+      display: none;
+    }
+    
+    .app-container.active {
+      display: block;
+    }
+    
+    .logout-btn {
+      float: right;
+      padding: 8px 15px;
+      background: #ff0000;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    
+    .logout-btn:hover {
+      background: #cc0000;
+    }
+    
     .container {
       max-width: 1400px;
       margin: 0 auto;
@@ -349,6 +433,19 @@
   </style>
 </head>
 <body>
+  <!-- Login Container -->
+  <div class="login-container active" id="loginContainer">
+    <div class="login-box">
+      <h1>🔐 ACCESO PRIVADO</h1>
+      <div class="login-error" id="loginError"></div>
+      <input type="text" id="username" placeholder="Usuario" value="Majestic">
+      <input type="password" id="password" placeholder="Contraseña" value="Elmaslok0">
+      <button onclick="login()">INGRESAR</button>
+    </div>
+  </div>
+  
+  <!-- App Container -->
+  <div class="app-container" id="appContainer">
   <div class="container">
     <header>
       <h1>🔬 PANEL BIOMÉTRICO FORENSE</h1>
@@ -728,6 +825,71 @@
     function showSuccess(msg) {
       message.innerHTML = `<div class="success">${msg}</div>`;
     }
+    
+    // ===== AUTENTICACIÓN =====
+    let sessionId = localStorage.getItem('sessionId');
+    
+    function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const errorDiv = document.getElementById('loginError');
+      
+      fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          sessionId = data.sessionId;
+          localStorage.setItem('sessionId', sessionId);
+          document.getElementById('loginContainer').classList.remove('active');
+          document.getElementById('appContainer').classList.add('active');
+          errorDiv.innerHTML = '';
+        } else {
+          errorDiv.innerHTML = data.error || 'Error de autenticación';
+        }
+      })
+      .catch(err => {
+        errorDiv.innerHTML = 'Error de conexión';
+      });
+    }
+    
+    function logout() {
+      fetch('/api/logout', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${sessionId}` }
+      })
+      .then(() => {
+        localStorage.removeItem('sessionId');
+        sessionId = null;
+        document.getElementById('loginContainer').classList.add('active');
+        document.getElementById('appContainer').classList.remove('active');
+        document.getElementById('username').value = 'Majestic';
+        document.getElementById('password').value = 'Elmaslok0';
+      });
+    }
+    
+    // Verificar sesión al cargar
+    window.addEventListener('load', () => {
+      if (sessionId) {
+        document.getElementById('loginContainer').classList.remove('active');
+        document.getElementById('appContainer').classList.add('active');
+      }
+    });
+    
+    // Interceptar fetch para agregar sessionId
+    const originalFetch = window.fetch;
+    window.fetch = function(...args) {
+      if (sessionId && args[0].startsWith('/api/')) {
+        if (!args[1]) args[1] = {};
+        if (!args[1].headers) args[1].headers = {};
+        args[1].headers['Authorization'] = `Bearer ${sessionId}`;
+      }
+      return originalFetch.apply(this, args);
+    };
   </script>
+  </div> <!-- Cierre del app-container -->
 </body>
 </html>
