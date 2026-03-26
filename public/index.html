@@ -879,20 +879,21 @@
       }
     });
     
-    // Interceptar fetch para agregar sessionId
+    // Interceptar fetch para agregar sessionId de forma segura
     const originalFetch = window.fetch;
-    window.fetch = function(...args) {
-      const url = typeof args[0] === 'string' ? args[0] : args[0].url;
-      if (sessionId && url.includes('/api/')) {
-        if (!args[1]) args[1] = {};
-        // Si es FormData, no debemos establecer Content-Type manualmente, 
-        // pero sí necesitamos la Authorization
-        if (!(args[1].headers instanceof Headers)) {
-          args[1].headers = new Headers(args[1].headers || {});
+    window.fetch = function(input, init) {
+      const url = typeof input === 'string' ? input : input.url;
+      if (sessionId && url.includes('/api/') && !url.includes('/api/login')) {
+        init = init || {};
+        init.headers = init.headers || {};
+        
+        if (init.headers instanceof Headers) {
+          init.headers.set('Authorization', `Bearer ${sessionId}`);
+        } else {
+          init.headers['Authorization'] = `Bearer ${sessionId}`;
         }
-        args[1].headers.set('Authorization', `Bearer ${sessionId}`);
       }
-      return originalFetch.apply(this, args);
+      return originalFetch(input, init);
     };
   </script>
   </div> <!-- Cierre del app-container -->
