@@ -101,48 +101,14 @@
       border: 1px solid #00ff00;
       padding: 8px;
       font-family: 'Courier New', monospace;
+      font-size: 12px;
       width: 100%;
       margin-bottom: 10px;
     }
     
-    .modes {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-    
-    .mode-button {
-      background: transparent;
-      border: 1px solid #00aa00;
-      color: #00aa00;
-      padding: 8px;
-      cursor: pointer;
-      font-size: 11px;
-      font-family: 'Courier New', monospace;
-      transition: all 0.3s;
-    }
-    
-    .mode-button:hover {
-      background: rgba(0, 255, 0, 0.1);
-    }
-    
-    .mode-button.active {
-      background: #00ff00;
-      color: #0a0e27;
-      border-color: #00ff00;
-      font-weight: bold;
-    }
-    
-    .slider-container {
-      margin-bottom: 20px;
-    }
-    
-    .slider-label {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 5px;
-      font-size: 12px;
+    textarea {
+      resize: vertical;
+      min-height: 80px;
     }
     
     input[type="range"] {
@@ -206,16 +172,19 @@
     }
     
     .button:disabled {
-      background: #333;
-      color: #666;
+      background: #666;
       cursor: not-allowed;
-      box-shadow: none;
+      opacity: 0.5;
     }
 
     .button-download {
       background: #00aa00;
       color: #fff;
       border: 1px solid #00ff00;
+      width: 100%;
+      margin-top: 20px;
+      padding: 15px;
+      display: none;
     }
 
     .button-download:hover {
@@ -223,55 +192,108 @@
       color: #0a0e27;
     }
     
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
     .preview {
       margin-top: 20px;
-      border: 1px solid #00aa00;
-      min-height: 200px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
-      background: #000;
+      text-align: center;
     }
     
     .preview img {
       max-width: 100%;
-      max-height: 400px;
+      max-height: 300px;
+      border: 1px solid #00ff00;
+      margin-bottom: 10px;
     }
     
     .results {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      background: rgba(0, 255, 0, 0.05);
+      padding: 15px;
+      border-left: 3px solid #00ff00;
+      margin-top: 20px;
+      font-size: 11px;
+      line-height: 1.6;
+      max-height: 400px;
+      overflow-y: auto;
     }
     
     .result-item {
       display: flex;
       justify-content: space-between;
-      border-bottom: 1px dashed #004400;
-      padding-bottom: 5px;
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(0, 255, 0, 0.2);
+    }
+    
+    .result-item:last-child {
+      border-bottom: none;
     }
     
     .result-label {
       color: #00aa00;
-      font-size: 12px;
+      flex: 1;
     }
     
     .result-value {
+      color: #00ff00;
       font-weight: bold;
-      font-size: 12px;
+      text-align: right;
+      flex: 1;
     }
     
     .result-section {
-      margin-bottom: 15px;
+      margin-top: 15px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(0, 255, 0, 0.3);
     }
     
     .result-section-title {
-      background: #004400;
       color: #00ff00;
-      padding: 5px 10px;
-      font-size: 11px;
-      margin-bottom: 10px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    
+    .loading {
+      display: none;
+      text-align: center;
+      margin: 20px 0;
+    }
+    
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #00ff00;
+      border-top: 2px solid transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .error {
+      background: rgba(255, 0, 0, 0.1);
+      border: 1px solid #ff0000;
+      color: #ff6666;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 3px;
+      font-size: 12px;
+    }
+    
+    .success {
+      background: rgba(0, 255, 0, 0.1);
+      border: 1px solid #00ff00;
+      color: #00ff00;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 3px;
+      font-size: 12px;
     }
     
     .comparison {
@@ -288,57 +310,56 @@
     .comparison-item img {
       max-width: 100%;
       border: 1px solid #00ff00;
+      margin-bottom: 5px;
     }
     
     .comparison-label {
-      font-size: 10px;
-      margin-top: 5px;
+      font-size: 11px;
       color: #00aa00;
     }
     
-    .loading {
-      display: none;
-      text-align: center;
-      margin: 20px 0;
+    .mode-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 15px;
     }
     
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 4px solid rgba(0, 255, 0, 0.1);
-      border-left-color: #00ff00;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 0 auto;
-    }
-    
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    
-    .success {
-      color: #00ff00;
-      background: rgba(0, 255, 0, 0.1);
-      padding: 10px;
+    .mode-button {
+      padding: 8px;
       border: 1px solid #00ff00;
-      margin-top: 15px;
-      font-size: 12px;
+      background: transparent;
+      color: #00ff00;
+      cursor: pointer;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      transition: all 0.3s;
     }
     
-    .error {
-      color: #ff0000;
-      background: rgba(255, 0, 0, 0.1);
-      padding: 10px;
-      border: 1px solid #ff0000;
-      margin-top: 15px;
-      font-size: 12px;
+    .mode-button:hover {
+      background: rgba(0, 255, 0, 0.1);
+    }
+    
+    .mode-button.active {
+      background: #00ff00;
+      color: #0a0e27;
     }
     
     .no-results {
-      color: #666;
       text-align: center;
-      padding: 40px;
-      font-style: italic;
+      color: #00aa00;
+      padding: 30px;
+      font-size: 12px;
+    }
+    
+    @media (max-width: 768px) {
+      .content {
+        grid-template-columns: 1fr;
+      }
+      
+      .mode-selector {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -355,43 +376,48 @@
         <h2>📤 Cargar Huella Dactilares</h2>
         
         <div class="upload-area" id="uploadArea">
-          <p>Arrastra la imagen aquí o haz clic para buscar</p>
+          <p>Arrastra una imagen aquí o haz clic para seleccionar</p>
+          <p style="font-size: 11px; color: #00aa00; margin-top: 10px;">
+            Formatos: PNG, JPG, BMP (máx 10MB)
+          </p>
           <input type="file" id="fileInput" accept="image/*">
         </div>
         
-        <div class="preview" id="preview">
-          <p style="color: #333;">Sin imagen cargada</p>
+        <div class="preview" id="preview"></div>
+        
+        <h3>Modo de Procesamiento</h3>
+        <div class="mode-selector">
+          <button class="mode-button active" data-mode="standard">Estándar</button>
+          <button class="mode-button" data-mode="preserve">Preservar</button>
+          <button class="mode-button" data-mode="texture">Textura</button>
+          <button class="mode-button" data-mode="fill">Relleno</button>
         </div>
         
-        <h3>⚙️ Configuración de Procesamiento</h3>
-        
-        <div class="modes">
-          <button class="mode-button active" data-mode="standard">ESTÁNDAR</button>
-          <button class="mode-button" data-mode="preserve">PRESERVAR</button>
-          <button class="mode-button" data-mode="texture">TEXTURA</button>
-          <button class="mode-button" data-mode="fill">RELLENO</button>
-          <button class="mode-button" data-mode="forensic">FORENSE</button>
-          <button class="mode-button" data-mode="ultra">ULTRA</button>
-        </div>
-        
-        <div class="slider-container">
-          <div class="slider-label">
-            <span>Intensidad de Poros:</span>
-            <span id="poreIntensityValue">1.0x</span>
+        <h3>🧬 Intensidad de Poros</h3>
+        <div style="background: #1a2d5c; padding: 12px; border: 1px solid #00ff00; border-radius: 4px; margin-bottom: 15px;">
+          <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 8px;">
+            <input type="range" id="poreIntensitySlider" min="0.1" max="5" step="0.1" value="1">
+            <span id="poreIntensityValue" style="color: #00ff00; font-weight: bold; font-size: 14px; min-width: 50px; text-align: right; background: #0a0e27; padding: 6px 10px; border: 1px solid #00ff00; border-radius: 3px; display: inline-block;">1.0x</span>
           </div>
-          <input type="range" id="poreIntensitySlider" min="0" max="5" step="0.1" value="1.0">
+          <p style="font-size: 10px; color: #00aa00; margin: 0;">Mín: 0.1x | Máx: 5x | Actual: <span id="poreIntensityLabel" style="color: #00ff00; font-weight: bold;">1.0x</span></p>
         </div>
         
-        <input type="text" id="customPrompt" placeholder="Instrucciones adicionales (ej: 'más poros en las puntas')">
+        <h3>Prompt Personalizado (Opcional)</h3>
+        <textarea id="customPrompt" placeholder="Ingresa un prompt personalizado para el procesamiento..."></textarea>
         
-        <div>
-          <button class="button" id="analyzeBtn" disabled>ANALIZAR</button>
-          <button class="button" id="processBtn" disabled>PROCESAR Y MEJORAR</button>
+        <div class="button-group">
+          <button class="button" id="analyzeBtn" disabled>
+            🔍 ANALIZAR
+          </button>
+          
+          <button class="button" id="processBtn" disabled>
+            ⚙️ PROCESAR
+          </button>
         </div>
         
         <div class="loading" id="loading">
           <div class="spinner"></div>
-          <p style="margin-top: 10px;">Procesando...</p>
+          <p style="margin-top: 10px; font-size: 12px;">Procesando...</p>
         </div>
         
         <div id="message"></div>
@@ -402,79 +428,8 @@
         <h2>📊 Análisis de Características</h2>
         
         <div id="analysisResults" style="display: none;">
-          <div class="results">
-            <!-- Información Básica -->
-            <div class="result-section">
-              <div class="result-section-title">📐 INFORMACIÓN BÁSICA</div>
-              <div class="result-item">
-                <span class="result-label">Dimensiones:</span>
-                <span class="result-value" id="dimensions">-</span>
-              </div>
-              <div class="result-item">
-                <span class="result-label">Calidad:</span>
-                <span class="result-value" id="quality">-</span>
-              </div>
-            </div>
-            
-            <!-- Estructura de Crestas -->
-            <div class="result-section">
-              <div class="result-section-title">〰️ ESTRUCTURA DE CRESTAS</div>
-              <div class="result-item">
-                <span class="result-label">Densidad:</span>
-                <span class="result-value" id="ridgeDensity">-</span>
-              </div>
-              <div class="result-item">
-                <span class="result-label">Orientación:</span>
-                <span class="result-value" id="ridgeOrientation">-</span>
-              </div>
-              <div class="result-item">
-                <span class="result-label">Patrón Detectado:</span>
-                <span class="result-value" id="pattern">-</span>
-              </div>
-            </div>
-            
-            <!-- Minucias -->
-            <div class="result-section">
-              <div class="result-section-title">📍 MINUCIAS DETECTADAS</div>
-              <div class="result-item">
-                <span class="result-label">Bifurcaciones:</span>
-                <span class="result-value" id="bifurcations">-</span>
-              </div>
-              <div class="result-item">
-                <span class="result-label">Terminaciones:</span>
-                <span class="result-value" id="terminations">-</span>
-              </div>
-              <div class="result-item">
-                <span class="result-label">Núcleo (Core):</span>
-                <span class="result-value" id="coreLocation">-</span>
-              </div>
-              <div class="result-item">
-                <span class="result-label">Deltas:</span>
-                <span class="result-value" id="deltaCount">-</span>
-              </div>
-            </div>
-            
-            <!-- Textura de Membrana -->
-            <div class="result-section">
-              <div class="result-section-title">🧬 TEXTURA DE MEMBRANA (IA)</div>
-              <div class="result-item">
-                <span class="result-label">Tamaño de Poro:</span>
-                <span class="result-value" id="poreSize">-</span>
-              </div>
-              <div class="result-item">
-                <span class="result-label">Granularidad:</span>
-                <span class="result-value" id="granularity">-</span>
-              </div>
-              <div class="result-item">
-                <span class="result-label">Intensidad Media:</span>
-                <span class="result-value" id="intensityMean">-</span>
-              </div>
-            </div>
-            
-            <div class="result-item" style="border-top: 1px solid #004400; margin-top: 10px; padding-top: 5px;">
-              <span class="result-label">Timestamp:</span>
-              <span class="result-value" id="timestamp">-</span>
-            </div>
+          <div class="results" id="resultsContent">
+            <!-- Los resultados se inyectarán aquí -->
           </div>
           
           <div class="comparison" id="comparisonPanel" style="display: none;">
@@ -488,9 +443,9 @@
             </div>
           </div>
 
-          <div id="downloadSection" style="display: none; margin-top: 20px;">
-            <button class="button button-download" id="downloadPngBtn">DESCARGAR PNG FINAL (ACOPLADO)</button>
-          </div>
+          <button class="button button-download" id="downloadPngBtn">
+            📥 DESCARGAR PNG FINAL (ACOPLADO)
+          </button>
         </div>
         
         <div id="noResults" class="no-results">
@@ -506,16 +461,17 @@
     const analyzeBtn = document.getElementById('analyzeBtn');
     const processBtn = document.getElementById('processBtn');
     const downloadPngBtn = document.getElementById('downloadPngBtn');
-    const downloadSection = document.getElementById('downloadSection');
     const preview = document.getElementById('preview');
     const loading = document.getElementById('loading');
     const message = document.getElementById('message');
     const analysisResults = document.getElementById('analysisResults');
     const noResults = document.getElementById('noResults');
+    const resultsContent = document.getElementById('resultsContent');
     const comparisonPanel = document.getElementById('comparisonPanel');
     const customPromptInput = document.getElementById('customPrompt');
     const poreIntensitySlider = document.getElementById('poreIntensitySlider');
     const poreIntensityValue = document.getElementById('poreIntensityValue');
+    const poreIntensityLabel = document.getElementById('poreIntensityLabel');
     
     let currentFile = null;
     let selectedMode = 'standard';
@@ -535,6 +491,7 @@
     poreIntensitySlider.addEventListener('input', (e) => {
       poreIntensity = parseFloat(e.target.value);
       poreIntensityValue.textContent = poreIntensity.toFixed(1) + 'x';
+      poreIntensityLabel.textContent = poreIntensity.toFixed(1) + 'x';
     });
     
     // Drag and drop
@@ -572,7 +529,7 @@
       currentFile = file;
       analyzeBtn.disabled = false;
       processBtn.disabled = false;
-      downloadSection.style.display = 'none';
+      downloadPngBtn.style.display = 'none';
       
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -620,7 +577,6 @@
       formData.append('fingerprint', currentFile);
       formData.append('mode', selectedMode);
       
-      // Construir prompt con intensidad de poros
       let finalPrompt = customPromptInput.value || '';
       if (poreIntensity !== 1.0) {
         const multiplier = Math.round(poreIntensity * 100) + '%';
@@ -643,7 +599,7 @@
           processedImageUrl = data.processedImage;
           displayAnalysis(data.analysis);
           displayComparison(data.processedImage);
-          downloadSection.style.display = 'block';
+          downloadPngBtn.style.display = 'block';
           showSuccess(`✓ Procesamiento completado (modo: ${data.processingMode})`);
         } else {
           showError('Error: ' + data.error);
@@ -655,83 +611,92 @@
       }
     });
 
+    // INGENIERÍA SENIOR: FUNCIÓN DE EXPORTACIÓN ROBUSTA (FLATTENED BITMAP)
     downloadPngBtn.addEventListener('click', async () => {
       if (!processedImageUrl) return;
       
       try {
+        showSuccess("Preparando descarga PNG aplanada (High Fidelity)...");
+        
         const img = new Image();
         img.crossOrigin = "anonymous";
         
         await new Promise((resolve, reject) => {
           img.onload = resolve;
-          img.onerror = reject;
+          img.onerror = () => reject(new Error("No se pudo cargar la imagen para rasterización"));
           img.src = processedImageUrl;
         });
 
+        // 1. Inicialización de Canvas con contexto opaco (Senior Best Practice)
         const canvas = document.createElement("canvas");
         canvas.width = img.width;
         canvas.height = img.height;
-        const ctx = canvas.getContext("2d");
+        const ctx = canvas.getContext("2d", { alpha: false }); // Forzar contexto opaco a nivel de sistema
 
-        // 1. Forzar fondo blanco sólido (#FFFFFF) - Elimina transparencia
+        // 2. Garantizar fondo blanco sólido (Eliminación total de transparencia/alpha)
         ctx.fillStyle = "#FFFFFF";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // 2. Dibujar la imagen sobre el fondo blanco (esto acopla/flatten la imagen)
+        // 3. Rasterización y Fusión (Flattening)
+        // Al dibujar sobre un contexto alpha:false con fondo sólido, el resultado es un bitmap de una sola capa
         ctx.drawImage(img, 0, 0);
 
-        // 3. Exportar como PNG sin canal alfa
-        const dataUrl = canvas.toDataURL("image/png");
+        // 4. Exportación a PNG estándar (Sin canal alfa, una sola capa visible en Photoshop)
+        const dataUrl = canvas.toDataURL("image/png", 1.0);
         
         const link = document.createElement("a");
         link.href = dataUrl;
-        link.download = `huella_acoplada_${Date.now()}.png`;
+        link.download = `HUELLA_FORENSE_ACOPLADA_${Date.now()}.png`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         
-        showSuccess("✓ Descarga completada (PNG acoplado)");
+        showSuccess("✓ Descarga completada: PNG Aplanado (1 Capa, Fondo Blanco)");
       } catch (error) {
-        console.error("Error en la descarga:", error);
-        showError("Error al procesar la imagen para descarga");
+        console.error("Export Error:", error);
+        showError("Falla en exportación: " + error.message);
       }
     });
     
     function displayAnalysis(analysis) {
-      document.getElementById('dimensions').textContent = `${analysis.width}x${analysis.height}px`;
-      document.getElementById('quality').textContent = analysis.quality + '%';
-      document.getElementById('ridgeDensity').textContent = analysis.ridgeDensity + '%';
-      document.getElementById('ridgeOrientation').textContent = analysis.ridgeOrientation;
-      document.getElementById('pattern').textContent = analysis.pattern;
-      document.getElementById('bifurcations').textContent = analysis.bifurcations;
-      document.getElementById('terminations').textContent = analysis.terminations;
+      let html = `
+        <div class="result-section">
+          <div class="result-section-title">📐 INFORMACIÓN BÁSICA</div>
+          <div class="result-item"><span class="result-label">Dimensiones:</span><span class="result-value">${analysis.width}x${analysis.height}px</span></div>
+          <div class="result-item"><span class="result-label">Calidad:</span><span class="result-value">${analysis.quality}%</span></div>
+        </div>
+        <div class="result-section">
+          <div class="result-section-title">〰️ ESTRUCTURA DE CRESTAS</div>
+          <div class="result-item"><span class="result-label">Densidad:</span><span class="result-value">${analysis.ridgeDensity}%</span></div>
+          <div class="result-item"><span class="result-label">Orientación:</span><span class="result-value">${analysis.ridgeOrientation}</span></div>
+          <div class="result-item"><span class="result-label">Patrón:</span><span class="result-value">${analysis.pattern}</span></div>
+        </div>
+        <div class="result-section">
+          <div class="result-section-title">📍 MINUCIAS DETECTADAS</div>
+          <div class="result-item"><span class="result-label">Bifurcaciones:</span><span class="result-value">${analysis.bifurcations}</span></div>
+          <div class="result-item"><span class="result-label">Terminaciones:</span><span class="result-value">${analysis.terminations}</span></div>
+        </div>
+        <div class="result-section">
+          <div class="result-section-title">🧬 TEXTURA DE MEMBRANA (IA)</div>
+          <div class="result-item"><span class="result-label">Tamaño de Poro:</span><span class="result-value">${analysis.poreSize}px</span></div>
+          <div class="result-item"><span class="result-label">Granularidad:</span><span class="result-value">${analysis.textureGranularity.granularity}%</span></div>
+        </div>
+      `;
       
-      if (analysis.coreLocation) {
-        document.getElementById('coreLocation').textContent = 
-          `(${analysis.coreLocation.x}, ${analysis.coreLocation.y})`;
-      }
-      
-      document.getElementById('deltaCount').textContent = 
-        (analysis.deltaLocations ? analysis.deltaLocations.length : 0) + ' puntos';
-      
-      document.getElementById('poreSize').textContent = analysis.poreSize + 'px';
-      document.getElementById('granularity').textContent = analysis.textureGranularity.granularity + '%';
-      document.getElementById('intensityMean').textContent = analysis.textureGranularity.mean;
-      document.getElementById('timestamp').textContent = new Date().toLocaleTimeString();
-      
+      resultsContent.innerHTML = html;
       analysisResults.style.display = 'block';
       noResults.style.display = 'none';
     }
     
-    function displayComparison(processedImageUrl) {
+    function displayComparison(processedUrl) {
       const reader = new FileReader();
       reader.onload = (e) => {
         document.getElementById('originalImg').src = e.target.result;
       };
       reader.readAsDataURL(currentFile);
       
-      document.getElementById('processedImg').src = processedImageUrl;
-      comparisonPanel.style.display = 'block';
+      document.getElementById('processedImg').src = processedUrl;
+      comparisonPanel.style.display = 'grid';
     }
     
     function showError(msg) {
