@@ -211,6 +211,17 @@
       cursor: not-allowed;
       box-shadow: none;
     }
+
+    .button-download {
+      background: #00aa00;
+      color: #fff;
+      border: 1px solid #00ff00;
+    }
+
+    .button-download:hover {
+      background: #00ff00;
+      color: #0a0e27;
+    }
     
     .preview {
       margin-top: 20px;
@@ -405,11 +416,11 @@
               </div>
             </div>
             
-            <!-- Características de Crestas -->
+            <!-- Estructura de Crestas -->
             <div class="result-section">
-              <div class="result-section-title">🔀 CARACTERÍSTICAS DE CRESTAS</div>
+              <div class="result-section-title">〰️ ESTRUCTURA DE CRESTAS</div>
               <div class="result-item">
-                <span class="result-label">Densidad de Crestas:</span>
+                <span class="result-label">Densidad:</span>
                 <span class="result-value" id="ridgeDensity">-</span>
               </div>
               <div class="result-item">
@@ -422,9 +433,9 @@
               </div>
             </div>
             
-            <!-- Puntos Característicos -->
+            <!-- Minucias -->
             <div class="result-section">
-              <div class="result-section-title">🎯 PUNTOS CARACTERÍSTICOS</div>
+              <div class="result-section-title">📍 MINUCIAS DETECTADAS</div>
               <div class="result-item">
                 <span class="result-label">Bifurcaciones:</span>
                 <span class="result-value" id="bifurcations">-</span>
@@ -433,13 +444,8 @@
                 <span class="result-label">Terminaciones:</span>
                 <span class="result-value" id="terminations">-</span>
               </div>
-            </div>
-            
-            <!-- Puntos de Referencia -->
-            <div class="result-section">
-              <div class="result-section-title">📍 PUNTOS DE REFERENCIA</div>
               <div class="result-item">
-                <span class="result-label">Core:</span>
+                <span class="result-label">Núcleo (Core):</span>
                 <span class="result-value" id="coreLocation">-</span>
               </div>
               <div class="result-item">
@@ -448,11 +454,11 @@
               </div>
             </div>
             
-            <!-- Análisis de Textura -->
+            <!-- Textura de Membrana -->
             <div class="result-section">
-              <div class="result-section-title">🌊 ANÁLISIS DE TEXTURA</div>
+              <div class="result-section-title">🧬 TEXTURA DE MEMBRANA (IA)</div>
               <div class="result-item">
-                <span class="result-label">Tamaño de Poros:</span>
+                <span class="result-label">Tamaño de Poro:</span>
                 <span class="result-value" id="poreSize">-</span>
               </div>
               <div class="result-item">
@@ -460,19 +466,30 @@
                 <span class="result-value" id="granularity">-</span>
               </div>
               <div class="result-item">
-                <span class="result-label">Media de Intensidad:</span>
+                <span class="result-label">Intensidad Media:</span>
                 <span class="result-value" id="intensityMean">-</span>
               </div>
             </div>
             
-            <!-- Metadata -->
-            <div class="result-section">
-              <div class="result-section-title">⏰ METADATA</div>
-              <div class="result-item">
-                <span class="result-label">Timestamp:</span>
-                <span class="result-value" id="timestamp">-</span>
-              </div>
+            <div class="result-item" style="border-top: 1px solid #004400; margin-top: 10px; padding-top: 5px;">
+              <span class="result-label">Timestamp:</span>
+              <span class="result-value" id="timestamp">-</span>
             </div>
+          </div>
+          
+          <div class="comparison" id="comparisonPanel" style="display: none;">
+            <div class="comparison-item">
+              <div class="comparison-label">ORIGINAL</div>
+              <img id="originalImg" src="" alt="Original">
+            </div>
+            <div class="comparison-item">
+              <div class="comparison-label">PROCESADA</div>
+              <img id="processedImg" src="" alt="Procesada">
+            </div>
+          </div>
+
+          <div id="downloadSection" style="display: none; margin-top: 20px;">
+            <button class="button button-download" id="downloadPngBtn">DESCARGAR PNG FINAL (ACOPLADO)</button>
           </div>
         </div>
         
@@ -481,28 +498,15 @@
         </div>
       </div>
     </div>
-    
-    <!-- Comparación Antes/Después -->
-    <div class="panel" id="comparisonPanel" style="display: none;">
-      <h2>🔄 Comparación Original vs Procesada</h2>
-      <div class="comparison">
-        <div class="comparison-item">
-          <img id="originalImg" src="" alt="Original">
-          <p class="comparison-label">ORIGINAL</p>
-        </div>
-        <div class="comparison-item">
-          <img id="processedImg" src="" alt="Procesada">
-          <p class="comparison-label">PROCESADA</p>
-        </div>
-      </div>
-    </div>
   </div>
-  
+
   <script>
     const uploadArea = document.getElementById('uploadArea');
     const fileInput = document.getElementById('fileInput');
     const analyzeBtn = document.getElementById('analyzeBtn');
     const processBtn = document.getElementById('processBtn');
+    const downloadPngBtn = document.getElementById('downloadPngBtn');
+    const downloadSection = document.getElementById('downloadSection');
     const preview = document.getElementById('preview');
     const loading = document.getElementById('loading');
     const message = document.getElementById('message');
@@ -516,6 +520,7 @@
     let currentFile = null;
     let selectedMode = 'standard';
     let poreIntensity = 1.0;
+    let processedImageUrl = null;
     
     // Selector de modo
     document.querySelectorAll('.mode-button').forEach(btn => {
@@ -567,6 +572,7 @@
       currentFile = file;
       analyzeBtn.disabled = false;
       processBtn.disabled = false;
+      downloadSection.style.display = 'none';
       
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -634,8 +640,10 @@
         const data = await response.json();
         
         if (response.ok) {
+          processedImageUrl = data.processedImage;
           displayAnalysis(data.analysis);
           displayComparison(data.processedImage);
+          downloadSection.style.display = 'block';
           showSuccess(`✓ Procesamiento completado (modo: ${data.processingMode})`);
         } else {
           showError('Error: ' + data.error);
@@ -644,6 +652,48 @@
         showError('Error de conexión: ' + error.message);
       } finally {
         loading.style.display = 'none';
+      }
+    });
+
+    downloadPngBtn.addEventListener('click', async () => {
+      if (!processedImageUrl) return;
+      
+      try {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+          img.src = processedImageUrl;
+        });
+
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+
+        // 1. Forzar fondo blanco sólido (#FFFFFF) - Elimina transparencia
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 2. Dibujar la imagen sobre el fondo blanco (esto acopla/flatten la imagen)
+        ctx.drawImage(img, 0, 0);
+
+        // 3. Exportar como PNG sin canal alfa
+        const dataUrl = canvas.toDataURL("image/png");
+        
+        const link = document.createElement("a");
+        link.href = dataUrl;
+        link.download = `huella_acoplada_${Date.now()}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showSuccess("✓ Descarga completada (PNG acoplado)");
+      } catch (error) {
+        console.error("Error en la descarga:", error);
+        showError("Error al procesar la imagen para descarga");
       }
     });
     
