@@ -731,33 +731,42 @@
       document.getElementById('downloadBtn').style.display = 'inline-block';
     }
     
-    // Manejador del botón de descarga
-    document.getElementById('downloadBtn').addEventListener('click', async () => {
-      if (!lastProcessedImageUrl) {
+    // Manejador del botón de descarga - Captura el canvas de la imagen mostrada
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+      const processedImg = document.getElementById('processedImg');
+      if (!processedImg || !processedImg.src) {
         showError('No hay imagen procesada para descargar');
         return;
       }
       
-      try {
-        // Descargar directamente desde la URL del servidor
-        const response = await fetch(lastProcessedImageUrl);
-        if (!response.ok) {
-          throw new Error('Error al descargar: ' + response.statusText);
-        }
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = function() {
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        ctx.drawImage(img, 0, 0);
         
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `huella-procesada-${new Date().getTime()}.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        showSuccess('✓ Imagen descargada exitosamente');
-      } catch (error) {
-        showError('Error al descargar: ' + error.message);
-      }
+        canvas.toBlob(function(blob) {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'huella-procesada-' + Date.now() + '.png';
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+          showSuccess('✓ Imagen descargada exitosamente');
+        }, 'image/png');
+      };
+      
+      img.onerror = function() {
+        showError('Error al procesar la imagen para descargar');
+      };
+      
+      img.crossOrigin = 'anonymous';
+      img.src = processedImg.src;
     });
     
     function showError(msg) {
