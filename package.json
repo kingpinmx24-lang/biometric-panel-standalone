@@ -1,0 +1,29 @@
+{
+  "name": "biometric-panel-standalone",
+  "version": "1.0.0",
+  "description": "Panel Biométrico Forense - Standalone Edition",
+  "main": "app.js",
+  "bin": {
+    "biometric-panel": "app.js"
+  },
+  "scripts": {
+    "start": "node app.js",
+    "dev": "node app.js"
+  },
+  "keywords": [
+    "biometric",
+    "fingerprint",
+    "forensic",
+    "analysis"
+  ],
+  "author": "Forensic Biometrics",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1",
+    "sharp": "^0.32.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
