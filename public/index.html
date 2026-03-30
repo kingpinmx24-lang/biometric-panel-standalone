@@ -728,36 +728,46 @@
       document.getElementById('downloadBtn').style.display = 'inline-block';
     }
     
-    // Manejador del botón de descarga
+    // Manejador del botón de descarga - Captura la imagen del DOM
     document.getElementById('downloadBtn').addEventListener('click', async () => {
-      if (!lastProcessedImageUrl) {
-        showError('No hay imagen procesada para descargar');
-        return;
-      }
-      
       try {
-        // Si es una URL relativa, descargar desde el servidor
-        if (lastProcessedImageUrl.startsWith('/')) {
-          const response = await fetch(lastProcessedImageUrl);
-          const blob = await response.blob();
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = `huella-procesada-${new Date().getTime()}.png`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
-        } else if (lastProcessedImageUrl.startsWith('data:')) {
-          // Si es un data URL, descargar directamente
-          const link = document.createElement('a');
-          link.href = lastProcessedImageUrl;
-          link.download = `huella-procesada-${new Date().getTime()}.png`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
+        const processedImg = document.getElementById('processedImg');
+        if (!processedImg || !processedImg.src) {
+          showError('No hay imagen procesada para descargar');
+          return;
         }
-        showSuccess('✓ Imagen descargada exitosamente');
+        
+        // Crear un canvas y dibujar la imagen
+        const canvas = document.createElement('canvas');
+        const img = new Image();
+        
+        img.onload = () => {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          
+          // Convertir canvas a blob y descargar
+          canvas.toBlob((blob) => {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `huella-procesada-${new Date().getTime()}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            showSuccess('✓ Imagen descargada exitosamente');
+          }, 'image/png');
+        };
+        
+        img.onerror = () => {
+          showError('Error al cargar la imagen para descargar');
+        };
+        
+        // Usar crossOrigin para evitar problemas CORS
+        img.crossOrigin = 'anonymous';
+        img.src = processedImg.src;
       } catch (error) {
         showError('Error al descargar: ' + error.message);
       }
@@ -773,7 +783,7 @@
         if (message.innerHTML === `<div class="success">${msg}</div>`) {
           message.innerHTML = '';
         }
-      }, 3000);
+      }, 4000);
     }
   </script>
 </body>
