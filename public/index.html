@@ -517,6 +517,9 @@
           <p class="comparison-label">PROCESADA</p>
         </div>
       </div>
+      <div style="margin-top: 20px; text-align: center;">
+        <button class="button" id="downloadBtn" style="display: none;">⬇️ Descargar Imagen PNG</button>
+      </div>
     </div>
   </div>
   
@@ -710,6 +713,8 @@
       noResults.style.display = 'none';
     }
     
+    let lastProcessedImageUrl = null;
+    
     function displayComparison(processedImageUrl) {
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -718,8 +723,45 @@
       reader.readAsDataURL(currentFile);
       
       document.getElementById('processedImg').src = processedImageUrl;
+      lastProcessedImageUrl = processedImageUrl;
       comparisonPanel.style.display = 'block';
+      document.getElementById('downloadBtn').style.display = 'inline-block';
     }
+    
+    // Manejador del botón de descarga
+    document.getElementById('downloadBtn').addEventListener('click', async () => {
+      if (!lastProcessedImageUrl) {
+        showError('No hay imagen procesada para descargar');
+        return;
+      }
+      
+      try {
+        // Si es una URL relativa, descargar desde el servidor
+        if (lastProcessedImageUrl.startsWith('/')) {
+          const response = await fetch(lastProcessedImageUrl);
+          const blob = await response.blob();
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `huella-procesada-${new Date().getTime()}.png`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        } else if (lastProcessedImageUrl.startsWith('data:')) {
+          // Si es un data URL, descargar directamente
+          const link = document.createElement('a');
+          link.href = lastProcessedImageUrl;
+          link.download = `huella-procesada-${new Date().getTime()}.png`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+        showSuccess('✓ Imagen descargada exitosamente');
+      } catch (error) {
+        showError('Error al descargar: ' + error.message);
+      }
+    });
     
     function showError(msg) {
       message.innerHTML = `<div class="error">${msg}</div>`;
@@ -727,6 +769,11 @@
     
     function showSuccess(msg) {
       message.innerHTML = `<div class="success">${msg}</div>`;
+      setTimeout(() => {
+        if (message.innerHTML === `<div class="success">${msg}</div>`) {
+          message.innerHTML = '';
+        }
+      }, 3000);
     }
   </script>
 </body>
