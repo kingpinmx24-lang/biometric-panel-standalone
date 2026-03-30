@@ -517,8 +517,9 @@
           <p class="comparison-label">PROCESADA</p>
         </div>
       </div>
-      <div style="margin-top: 20px; text-align: center;">
-        <button class="button" id="downloadBtn" style="display: none;">⬇️ Descargar Imagen PNG</button>
+      <div style="margin-top: 20px; text-align: center; display: flex; gap: 10px; justify-content: center;">
+        <button class="button" id="downloadPngBtn" style="display: none;">⬇️ PNG</button>
+        <button class="button" id="downloadJpgBtn" style="display: none;">⬇️ JPG</button>
       </div>
     </div>
   </div>
@@ -731,18 +732,18 @@
       console.log('Is data URL:', processedImageUrl.startsWith('data:'));
       
       comparisonPanel.style.display = 'block';
-      document.getElementById('downloadBtn').style.display = 'inline-block';
+      document.getElementById('downloadPngBtn').style.display = 'inline-block';
+      document.getElementById('downloadJpgBtn').style.display = 'inline-block';
     }
     
-    // Manejador del botón de descarga - Descarga directamente el data URL
-    document.getElementById('downloadBtn').addEventListener('click', () => {
+    // Manejador del botón de descarga PNG
+    document.getElementById('downloadPngBtn').addEventListener('click', () => {
       if (!lastProcessedImageUrl) {
         showError('No hay imagen procesada para descargar');
         return;
       }
       
       try {
-        // Si es un data URL, descargar directamente
         if (lastProcessedImageUrl.startsWith('data:')) {
           const link = document.createElement('a');
           link.href = lastProcessedImageUrl;
@@ -750,12 +751,58 @@
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
-          showSuccess('✓ Imagen descargada exitosamente');
+          showSuccess('✓ PNG descargado exitosamente');
         } else {
           showError('Formato de imagen no soportado');
         }
       } catch (error) {
-        showError('Error al descargar: ' + error.message);
+        showError('Error al descargar PNG: ' + error.message);
+      }
+    });
+    
+    // Manejador del botón de descarga JPG
+    document.getElementById('downloadJpgBtn').addEventListener('click', () => {
+      if (!lastProcessedImageUrl) {
+        showError('No hay imagen procesada para descargar');
+        return;
+      }
+      
+      try {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          
+          // Fondo blanco para JPG
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          
+          // Dibujar imagen
+          ctx.drawImage(img, 0, 0);
+          
+          // Convertir a JPG
+          canvas.toBlob((blob) => {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'huella-procesada-' + Date.now() + '.jpg';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            showSuccess('✓ JPG descargado exitosamente');
+          }, 'image/jpeg', 0.95);
+        };
+        
+        img.onerror = () => {
+          showError('Error al procesar imagen para JPG');
+        };
+        
+        img.src = lastProcessedImageUrl;
+      } catch (error) {
+        showError('Error al descargar JPG: ' + error.message);
       }
     });
     
