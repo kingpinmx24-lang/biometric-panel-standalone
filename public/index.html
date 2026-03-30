@@ -31,7 +31,7 @@
   <div class="container">
     <header>
       <h1>🔬 PANEL BIOMÉTRICO FORENSE</h1>
-      <p class="subtitle">Standalone Edition - Procesamiento Local</p>
+      <p class="subtitle">Standalone Edition - Procesamiento Local (v2.0.1-FINAL)</p>
     </header>
     <div class="content">
       <div class="panel">
@@ -124,15 +124,21 @@
     };
 
     downloadBtn.onclick = () => {
-      if (!finalBlob) return;
-      const url = URL.createObjectURL(finalBlob);
+      if (!finalBlob) {
+        alert("Error: No se ha generado el archivo de descarga. Por favor, procesa la imagen de nuevo.");
+        return;
+      }
+      const url = window.URL.createObjectURL(finalBlob);
       const link = document.createElement('a');
+      link.style.display = 'none';
       link.href = url;
-      link.download = `HUELLA_FORENSE_${Date.now()}.png`;
+      link.setAttribute('download', `HUELLA_FORENSE_${Date.now()}.png`);
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
-      setTimeout(() => URL.revokeObjectURL(url), 100);
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }, 200);
     };
   </script>
 </body>
