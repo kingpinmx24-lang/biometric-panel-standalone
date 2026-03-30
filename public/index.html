@@ -22,11 +22,8 @@
     .button:disabled { background: #666; cursor: not-allowed; opacity: 0.5; }
     .button-download { background: #00aa00; color: #fff; border: 1px solid #00ff00; width: 100%; margin-top: 20px; padding: 15px; display: none; }
     .preview img, .comparison-item img { max-width: 100%; border: 1px solid #00ff00; margin-bottom: 10px; }
-    .results { background: rgba(0, 255, 0, 0.05); padding: 15px; border-left: 3px solid #00ff00; margin-top: 20px; font-size: 11px; }
-    .result-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(0, 255, 0, 0.2); }
     .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
     .loading { display: none; text-align: center; margin: 20px 0; }
-    .error { background: rgba(255, 0, 0, 0.1); border: 1px solid #ff0000; color: #ff6666; padding: 10px; margin-top: 10px; font-size: 12px; }
     .success { background: rgba(0, 255, 0, 0.1); border: 1px solid #00ff00; color: #00ff00; padding: 10px; margin-top: 10px; font-size: 12px; }
   </style>
 </head>
@@ -45,7 +42,7 @@
         </div>
         <div class="preview" id="preview"></div>
         <div class="button-group">
-          <button class="button" id="processBtn" disabled>⚙️ PROCESAR Y DESCARGAR</button>
+          <button class="button" id="processBtn" disabled>⚙️ PROCESAR Y PREPARAR DESCARGA</button>
         </div>
         <div class="loading" id="loading"><p>Procesando...</p></div>
         <div id="message"></div>
@@ -58,7 +55,7 @@
             <div class="comparison-item"><img id="originalImg"><p>ORIGINAL</p></div>
             <div class="comparison-item"><img id="processedImg"><p>PROCESADA</p></div>
           </div>
-          <button class="button button-download" id="downloadBtn">📥 DESCARGAR PNG</button>
+          <button class="button button-download" id="downloadBtn">📥 DESCARGAR PNG FINAL</button>
         </div>
       </div>
     </div>
@@ -76,6 +73,7 @@
     const noResults = document.getElementById('noResults');
     
     let currentFile = null;
+    let finalBlob = null;
 
     uploadArea.onclick = () => fileInput.click();
     fileInput.onchange = (e) => e.target.files[0] && handleFile(e.target.files[0]);
@@ -101,19 +99,24 @@
           canvas.width = img.width;
           canvas.height = img.height;
           
-          // PROCESAMIENTO FORENSE EN CLIENTE (Garantiza visibilidad)
-          ctx.filter = 'grayscale(100%) contrast(200%) brightness(110%) invert(100%)';
+          // PROCESAMIENTO FORENSE REAL
+          ctx.filter = 'grayscale(100%) contrast(250%) brightness(110%) invert(100%)';
           ctx.drawImage(img, 0, 0);
           
-          const processedData = canvas.toDataURL('image/png');
-          document.getElementById('originalImg').src = e.target.result;
-          document.getElementById('processedImg').src = processedData;
-          
-          resultArea.style.display = 'block';
-          noResults.style.display = 'none';
-          downloadBtn.style.display = 'block';
-          loading.style.display = 'none';
-          message.innerHTML = '<div class="success">✓ Procesado con éxito</div>';
+          // CAPTURA DEL BLOB PARA DESCARGA SEGURA
+          canvas.toBlob((blob) => {
+            finalBlob = blob;
+            const processedUrl = URL.createObjectURL(blob);
+            
+            document.getElementById('originalImg').src = e.target.result;
+            document.getElementById('processedImg').src = processedUrl;
+            
+            resultArea.style.display = 'block';
+            noResults.style.display = 'none';
+            downloadBtn.style.display = 'block';
+            loading.style.display = 'none';
+            message.innerHTML = '<div class="success">✓ Huella procesada y lista para descargar</div>';
+          }, 'image/png');
         };
         img.src = e.target.result;
       };
@@ -121,10 +124,15 @@
     };
 
     downloadBtn.onclick = () => {
+      if (!finalBlob) return;
+      const url = URL.createObjectURL(finalBlob);
       const link = document.createElement('a');
-      link.download = `HUELLA_PROCESADA_${Date.now()}.png`;
-      link.href = document.getElementById('processedImg').src;
+      link.href = url;
+      link.download = `HUELLA_FORENSE_${Date.now()}.png`;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(url), 100);
     };
   </script>
 </body>
