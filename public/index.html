@@ -744,17 +744,14 @@
       }
       
       try {
-        if (lastProcessedImageUrl.startsWith('data:')) {
-          const link = document.createElement('a');
-          link.href = lastProcessedImageUrl;
-          link.download = 'huella-procesada-' + Date.now() + '.png';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          showSuccess('✓ PNG descargado exitosamente');
-        } else {
-          showError('Formato de imagen no soportado');
-        }
+        const link = document.createElement('a');
+        link.href = lastProcessedImageUrl;
+        link.download = 'huella-procesada-' + Date.now() + '.png';
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showSuccess('✓ PNG descargado exitosamente');
       } catch (error) {
         showError('Error al descargar PNG: ' + error.message);
       }
@@ -769,6 +766,7 @@
       
       try {
         const img = new Image();
+        img.crossOrigin = 'anonymous';
         img.onload = () => {
           const canvas = document.createElement('canvas');
           canvas.width = img.width;

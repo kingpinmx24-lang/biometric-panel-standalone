@@ -20,6 +20,7 @@ if (!fs.existsSync(resultsDir)) {
 
 // Servir archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/results', express.static(resultsDir));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb' }));
 
@@ -166,17 +167,20 @@ app.post('/api/process-advanced', upload.single('fingerprint'), async (req, res)
     // Mejorar con prompt personalizado
     const enhanced = await enhanceFingerprintTexture(req.file.buffer, mode, customPrompt);
     
-    // Convertir imagen a PNG buffer y luego a base64
-    const pngBuffer = await sharp(enhanced).png().toBuffer();
-    const base64String = pngBuffer.toString('base64');
-    const dataUrl = `data:image/png;base64,${base64String}`;
+    // Guardar imagen procesada como archivo PNG
+    const filename = `fingerprint-${Date.now()}.png`;
+    const filepath = path.join(resultsDir, filename);
+    await sharp(enhanced).png().toFile(filepath);
     
-    console.log(`[PROCESS-ADVANCED] Image converted to base64, size: ${base64String.length} chars`);
+    console.log(`[PROCESS-ADVANCED] Image saved to: ${filepath}`);
+    
+    // Retornar URL pública para descargar
+    const downloadUrl = `/results/${filename}`;
     
     res.json({
       success: true,
       analysis,
-      processedImage: dataUrl,
+      processedImage: downloadUrl,
       processingMode: mode,
       customPrompt: customPrompt || null,
       timestamp: new Date().toISOString()
