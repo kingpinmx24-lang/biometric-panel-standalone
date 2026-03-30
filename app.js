@@ -256,23 +256,29 @@ app.get('/api/info', (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 3001;
-const HOST = '0.0.0.0';
+// Export app for Vercel
+module.exports = app;
 
-const server = app.listen(PORT, HOST, () => {
-  console.log(`\n${'='.repeat(60)}`);
-  console.log(`🔬 PANEL BIOMÉTRICO FORENSE - STANDALONE EDITION`);
-  console.log(`${'='.repeat(60)}`);
-  console.log(`📍 URL: http://localhost:${PORT}`);
-  console.log(`✓ Procesamiento local sin dependencias de LLM`);
-  console.log(`✓ Visión computacional avanzada activada`);
-  console.log(`✓ Análisis de características biométricas en tiempo real`);
-  console.log(`${'='.repeat(60)}\n`);
-});
-
-server.on('error', (err) => {
-  if (err.code === 'EADDRINUSE') {
-    console.error(`Puerto ${PORT} ya en uso`);
-  }
-  process.exit(1);
-});
+// Start server only in local development
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 3001;
+  const HOST = '0.0.0.0';
+  
+  const server = app.listen(PORT, HOST, () => {
+    console.log(`\n${'='.repeat(60)}`);
+    console.log(`🔬 PANEL BIOMÉTRICO FORENSE - STANDALONE EDITION`);
+    console.log(`${'='.repeat(60)}`);
+    console.log(`📍 URL: http://localhost:${PORT}`);
+    console.log(`✓ Procesamiento local sin dependencias de LLM`);
+    console.log(`✓ Visión computacional avanzada activada`);
+    console.log(`✓ Análisis de características biométricas en tiempo real`);
+    console.log(`${'='.repeat(60)}\n`);
+  });
+  
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`Puerto ${PORT} ya en uso`);
+    }
+    process.exit(1);
+  });
+}
