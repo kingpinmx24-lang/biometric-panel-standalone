@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>SOLUCIÓN FINAL - VERIFICADA</title>
+    <style>
+        body { background: #000; color: #0f0; font-family: monospace; text-align: center; padding: 50px; }
+        .box { border: 2px solid #0f0; padding: 20px; display: inline-block; background: #111; }
+        #preview { max-width: 400px; margin: 20px 0; border: 1px solid #0f0; display: none; }
+        .btn { background: #0f0; color: #000; padding: 15px 30px; border: none; cursor: pointer; font-weight: bold; font-size: 18px; }
+        .btn:disabled { background: #555; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>🔬 PANEL FORENSE - VERSIÓN FINAL</h1>
+        <p>1. Selecciona la huella:</p>
+        <input type="file" id="input" accept="image/*"><br>
+        <img id="preview">
+        <canvas id="canvas" style="display:none;"></canvas>
+        <br>
+        <button id="go" class="btn" disabled>PROCESAR Y DESCARGAR YA</button>
+        <p id="status"></p>
+    </div>
+
+    <script>
+        const input = document.getElementById('input');
+        const go = document.getElementById('go');
+        const preview = document.getElementById('preview');
+        const canvas = document.getElementById('canvas');
+        const status = document.getElementById('status');
+
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    preview.src = ev.target.result;
+                    preview.style.display = 'inline-block';
+                    go.disabled = false;
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        go.onclick = () => {
+            status.innerText = "PROCESANDO...";
+            const img = new Image();
+            img.onload = () => {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                
+                // FILTRO DE ALTO CONTRASTE PURO
+                ctx.filter = 'grayscale(100%) contrast(500%) brightness(120%) invert(100%)';
+                ctx.drawImage(img, 0, 0);
+                
+                // DESCARGA DIRECTA DE PÍXELES
+                canvas.toBlob((blob) => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = "HUELLA_REPARADA_OK.png";
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    status.innerText = "¡DESCARGADO! Revisa tu carpeta de descargas.";
+                }, 'image/png');
+            };
+            img.src = preview.src;
+        };
+    </script>
+</body>
+</html>
