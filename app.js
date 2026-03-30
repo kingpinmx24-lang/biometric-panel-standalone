@@ -166,20 +166,17 @@ app.post('/api/process-advanced', upload.single('fingerprint'), async (req, res)
     // Mejorar con prompt personalizado
     const enhanced = await enhanceFingerprintTexture(req.file.buffer, mode, customPrompt);
     
-    // Guardar imagen procesada como archivo PNG
-    const filename = `fingerprint-${Date.now()}.png`;
-    const filepath = path.join(resultsDir, filename);
-    await sharp(enhanced).png().toFile(filepath);
+    // Convertir imagen a PNG buffer y luego a base64
+    const pngBuffer = await sharp(enhanced).png().toBuffer();
+    const base64String = pngBuffer.toString('base64');
+    const dataUrl = `data:image/png;base64,${base64String}`;
     
-    console.log(`[PROCESS-ADVANCED] Image saved to: ${filepath}`);
-    
-    // Retornar URL pública para descargar
-    const downloadUrl = `/api/download/${filename}`;
+    console.log(`[PROCESS-ADVANCED] Image converted to base64, size: ${base64String.length} chars`);
     
     res.json({
       success: true,
       analysis,
-      processedImage: downloadUrl,
+      processedImage: dataUrl,
       processingMode: mode,
       customPrompt: customPrompt || null,
       timestamp: new Date().toISOString()

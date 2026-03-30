@@ -727,46 +727,36 @@
       
       // Mostrar la imagen en el img tag
       document.getElementById('processedImg').src = processedImageUrl;
+      console.log('Processed image URL length:', processedImageUrl.length);
+      console.log('Is data URL:', processedImageUrl.startsWith('data:'));
+      
       comparisonPanel.style.display = 'block';
       document.getElementById('downloadBtn').style.display = 'inline-block';
     }
     
-    // Manejador del botón de descarga - Captura el canvas de la imagen mostrada
+    // Manejador del botón de descarga - Descarga directamente el data URL
     document.getElementById('downloadBtn').addEventListener('click', () => {
-      const processedImg = document.getElementById('processedImg');
-      if (!processedImg || !processedImg.src) {
+      if (!lastProcessedImageUrl) {
         showError('No hay imagen procesada para descargar');
         return;
       }
       
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      const img = new Image();
-      
-      img.onload = function() {
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
-        ctx.drawImage(img, 0, 0);
-        
-        canvas.toBlob(function(blob) {
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'huella-procesada-' + Date.now() + '.png';
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
-          document.body.removeChild(a);
+      try {
+        // Si es un data URL, descargar directamente
+        if (lastProcessedImageUrl.startsWith('data:')) {
+          const link = document.createElement('a');
+          link.href = lastProcessedImageUrl;
+          link.download = 'huella-procesada-' + Date.now() + '.png';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
           showSuccess('✓ Imagen descargada exitosamente');
-        }, 'image/png');
-      };
-      
-      img.onerror = function() {
-        showError('Error al procesar la imagen para descargar');
-      };
-      
-      img.crossOrigin = 'anonymous';
-      img.src = processedImg.src;
+        } else {
+          showError('Formato de imagen no soportado');
+        }
+      } catch (error) {
+        showError('Error al descargar: ' + error.message);
+      }
     });
     
     function showError(msg) {
