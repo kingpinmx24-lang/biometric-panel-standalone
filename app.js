@@ -166,26 +166,28 @@ app.post('/api/process-advanced', upload.single('fingerprint'), async (req, res)
     // Mejorar con prompt personalizado
     const enhanced = await enhanceFingerprintTexture(req.file.buffer, mode, customPrompt);
     
-    // Guardar resultado
-    const filename = `fingerprint-${Date.now()}.png`;
-    const filepath = path.join(resultsDir, filename);
-    await sharp(enhanced).toFile(filepath);
+    // Convertir a base64 para retornar directamente
+    const imageBuffer = await sharp(enhanced).png().toBuffer();
+    const base64Image = 'data:image/png;base64,' + imageBuffer.toString('base64');
     
-    console.log(`[PROCESS-ADVANCED] Saved processed image: ${filename}`);
+    console.log(`[PROCESS-ADVANCED] Image processed and converted to base64`);
     
     res.json({
       success: true,
       analysis,
-      processedImage: `/results/${filename}`,
+      processedImage: base64Image,
       processingMode: mode,
       customPrompt: customPrompt || null,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('[PROCESS-ADVANCED] Error:', error.message);
+    console.error('[PROCESS-ADVANCED] Error:', error);
     res.status(500).json({ error: error.message });
   }
 });
+
+// Servir archivos estáticos de resultados si existen
+app.use('/results', express.static(resultsDir));
 
 /**
  * Endpoint: Descargar resultados
@@ -223,6 +225,17 @@ app.get('/api/results', (req, res) => {
 /**
  * Health check
  */
+// Endpoint para descargar imagen procesada
+app.get('/api/download/:filename', (req, res) => {
+  try {
+    const filename = req.params.filename;
+    const filepath = path.join(resultsDir, filename);
+    res.download(filepath);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'ok',
